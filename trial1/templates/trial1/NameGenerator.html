@@ -1,0 +1,39 @@
+{% extends 'trial1/base.html' %}
+{% block title %}
+    Name Generator
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+    <form class="form-signin" method="POST">
+        <br/>
+        {% csrf_token %}
+        {% load static %}
+        <img class="mb-4" src="{% static 'trial1/eneru_logo.jpg' %}" alt="Image">
+        <h1 class="h3 mb-3 font-weight-normal">
+            Hello {{ user.username }}! Please Provide the Number of Names to be Generated
+        </h1>
+        <br>
+        <label for="inputUsername" class="sr-only">
+            Provide the Number
+        </label>
+        {% if not name_list %}
+            <input type="number" id="inputUsername" class="form-control" placeholder="Number" name="number" required autofocus>
+        {% else %}
+            <input type="number" id="inputUsername" class="form-control" placeholder="Number" name="number">
+        {% endif %}
+        <br>
+        <button class="btn btn-lg btn-primary btn-block" name = "submit" type="submit" value="Submit">Submit</button>
+        <br>
+        <button class="btn btn-lg btn-secondary btn-block" name = "clear" type="submit" value="Clear">Clear</button>
+    </form>
+    {% if name_list %}
+    <h2>Here are your generated names:</h2>
+    <ul>
+        {% for name in name_list %}
+            <li>{{ name }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+{% endblock %}

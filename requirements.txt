@@ -1,0 +1,4 @@
+Django
+python==3.11
+datasets
+torch

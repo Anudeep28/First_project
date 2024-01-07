@@ -1,0 +1,42 @@
+{% extends 'trial1/base.html' %}
+
+{% block title %}
+  Login
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+    <form class="form-signin" method="POST">
+        <br/>
+        {% csrf_token %}
+        {% load static %}
+        <img class="mb-4" src="{% static 'trial1/eneru_logo.jpg' %}" alt="Image">
+        <h1 class="h3 mb-3 font-weight-normal">
+            Please sign in
+        </h1>
+        <br>
+        <label for="inputUsername" class="sr-only">
+            User Name
+        </label>
+        <input type="text" id="inputUsername" class="form-control" placeholder="User Name" name="username" required autofocus>
+        <br>
+        <label for="inputPassword" class="sr-only">
+            Password
+        </label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+        <br>
+        <!-- In your template file, use a for loop to create the option elements -->
+        <label for="category" class="sr-only">Choose a category:</label>
+        <select id="category" name="category" class="form-control">
+          {% for option in options %}
+            <option value="{{ option.name }}">{{ option.name }}</option>
+          {% endfor %}
+        </select>
+        <div class="checkbox mb-3">
+            <h6>Dont Have an account? </h6>
+            <a class="btn btn-sm btn-secondary" href="{% url 'register' %}">Register</a>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+</body>
+{% endblock %}
