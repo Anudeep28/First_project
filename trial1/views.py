@@ -7,6 +7,10 @@ from django.contrib.auth.forms import UserCreationForm
 # To display messages to the user using Django built in forms
 from django.contrib import messages
 
+# initialized the LLM
+# call the LLM function
+llm = nameGen()
+
 # Create your views here.
 def homepage(request):
     # getting all the options to be displayed
@@ -121,8 +125,7 @@ def NameGenerator(request):
     if request.method == 'POST':
         #print(request.POST.get('submit'))
         if request.POST.get('submit') == 'Submit':
-            # call the LLM function
-            llm = nameGen()
+
             # get the number input by user
             number = int(request.POST.get('number'))
             name_list = llm.gen_name(num=number)
