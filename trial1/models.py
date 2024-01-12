@@ -19,7 +19,7 @@ class Item(models.Model):
     # Method to show the string within the models
     def __str__(self):
         return self.name
-
+"""
 class appoptions(models.Model):
     # name of the apps present for use in the App
     name = models.CharField(max_length=128)
@@ -29,3 +29,16 @@ class appoptions(models.Model):
     # method to show string within the models
     def __str__(self):
         return self.name
+"""
+class Option(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+class appoptions(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    options = models.ManyToManyField(Option)
+
+    def __str__(self):
+        return self.user.username

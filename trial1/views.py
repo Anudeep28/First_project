@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Item, appoptions
+from .models import Item, appoptions, User, Option
 from .name_model import nameGen
 from django.contrib.auth import authenticate, login, logout
 # User Creation Form is useful in grabbing all the information from html form tag
@@ -14,21 +14,23 @@ llm = nameGen()
 # Create your views here.
 def homepage(request):
     # getting all the options to be displayed
-    options = appoptions.objects.all()
+    options = Option.objects.all()
     # the name assumes you have files under templates folder
-    if request.method == 'GET':
+    #if request.method == 'GET':
+    if request.user.is_authenticated:
+        user_profile = appoptions.objects.get(user=request.user)
+        option = user_profile.options.all()
+        option = option[0].name
+        #option = str(appoptions.objects.filter(owner = request.user))
+        #print(option)
+        link_opt = ''.join(i for i in option.split(' '))
+        return render(request, template_name='trial1/home.html',
+                        context={'option': option, 'link_opt':link_opt, 'options': options})
+    else:
 
-        if request.user.is_authenticated:
-            option = str(appoptions.objects.get(owner = request.user))
-            print(option)
-            link_opt = ''.join(i for i in option.split(' '))
-            return render(request, template_name='trial1/home.html',
-                          context={'option': option, 'link_opt':link_opt, 'options': options})
-        else:
-
-            # hence we have started with trial1 instead templates
-            return render(request, template_name='trial1/home.html',
-                          context={'options': options})
+        # hence we have started with trial1 instead templates
+        return render(request, template_name='trial1/home.html',
+                        context={'options': options})
 
 def itemspage(request):
     if request.method == 'GET':
@@ -50,7 +52,7 @@ def itemspage(request):
 
 def loginpage(request):
     if request.method == 'GET':
-        options = appoptions.objects.all()
+        options = Option.objects.all()
         return render(request, template_name='trial1/login.html', context = {'options': options})
 
     if request.method == 'POST':
@@ -58,21 +60,21 @@ def loginpage(request):
         # from POST method
         username = request.POST.get('username')
         password = request.POST.get('password')
+        selected_opt = request.POST.get('category')
 
         user = authenticate(username=username, password=password)
         if user is not None:
-            login(request, user)
-            #messages.success(request, f'You have Successfully logged in as {user.username}')
-            # Part where we identify which user has registered for which product
-            registered_option = str(appoptions.objects.get(owner = request.user))
-            selected_opt = request.POST.get('category')
-
-            if registered_option and registered_option == selected_opt:
-                # return the page for the registered option
+            user_profile = appoptions.objects.get(user=user)
+            registered_option = Option.objects.filter(id=selected_opt).first()
+            print(registered_option)
+            if user_profile.options.filter(id=selected_opt).exists():
+                login(request, user)
+                #.objects.filter(owner = username))
                 messages.success(request, f'You have Successfully logged in as {user.username}')
-                return redirect(''.join(i for i in registered_option.split(' ')))
+                return redirect(''.join(i for i in registered_option.name.split(' ')))
+                
             else:
-                messages.error(request, f'You are not Registered for {selected_opt}, Select registered option')
+                messages.error(request, f'You are not Registered for {registered_option}, Select the registered option')
                 # redirecting user to items page
                 # ** items names should be same as the html filename **
                 return redirect('login')
@@ -82,7 +84,7 @@ def loginpage(request):
 
 def registerpage(request):
     if request.method == 'GET':
-        options = appoptions.objects.all()
+        options = Option.objects.all()
         return render(request, template_name='trial1/register.html', context = {'options': options})
     if request.method == 'POST':
         # grabbing all the information from the forms input tags
@@ -91,21 +93,30 @@ def registerpage(request):
         if form.is_valid():
             # Save the form to database
             form.save()
+            
             # grabbing the Username
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             option_selected = request.POST.get('category')
+            options = Option.objects.filter(id__in=option_selected)
             user = authenticate(username=username, password=password)
-            login(request, user)
+            
+            #user = User.objects.create_user(username=username, password=password)
+            
+            user_profile = appoptions.objects.create(user=user)
+            user_profile.options.set(options)
 
-            # Register the user for selected category
-            option_confirmed = appoptions.objects.get(name=option_selected)
-            option_confirmed.owner = request.user
-            option_confirmed.save()
+            
+            if user is not None:
+                login(request, user)
+                # Register the user for selected category
+                #option_confirmed = appoptions.objects.get(name=option_selected)
+                #option_confirmed.owner = user.username
+                #option_confirmed.save()
 
-            # messages
-            messages.success(request,f'You have Successfully Registered as {user.username}')
-            return redirect('login')
+                # messages
+                messages.success(request,f'You have Successfully Registered as {user.username}')
+                return redirect('login')
         else:
             messages.error(request, form.errors)
             return redirect('register')

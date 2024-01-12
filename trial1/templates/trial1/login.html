@@ -29,7 +29,7 @@
         <label for="category" class="sr-only">Choose a category:</label>
         <select id="category" name="category" class="form-control">
           {% for option in options %}
-            <option value="{{ option.name }}">{{ option.name }}</option>
+            <option value="{{ option.id }}">{{ option.name }}</option>
           {% endfor %}
         </select>
         <div class="checkbox mb-3">
